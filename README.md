@@ -14,6 +14,8 @@ An automated timesheet reminder application built for **Narwal AI** that identif
 - [Running the App](#running-the-app)
 - [How It Works](#how-it-works)
 - [Reminder Logic](#reminder-logic)
+- [Auth Notes](#auth-notes)
+- [Notes](#notes)
 
 ---
 
@@ -39,8 +41,8 @@ Office_timesheet_remainder/
 │   ├── data_processing.py          # Loads & processes employee + timesheet data
 │   ├── email_sender.py             # Sends personalized emails via Graph API
 │   ├── teams_sender.py             # Sends personalized Teams messages via Graph API
-│   ├── graph_auth.py               # App-only token (for email)
-│   └── test_teams_auth.py          # Delegated token with device flow (for Teams)
+│   ├── graph_auth.py               # App-only token auth (for email)
+│   └── test_teams_auth.py          # Delegated token auth with device flow (for Teams)
 │
 ├── data/
 │   ├── employee_data_Export.csv    # Employee master (upload via UI or place here)
@@ -120,17 +122,16 @@ cp .env.example .env
 Fill in your values:
 
 ```env
+# Sender Account
+SENDER_EMAIL=autoreminder@yourcompany.com
 
-# Microsoft Graph — Delegated (for Teams)
+# Microsoft Graph API — Azure App Registration
 TEAMS_TENANT_ID=your-tenant-id
-TEAMS_CLIENT_ID=your-teams-client-id
-TEAMS_CLIENT_SECRET=your-client-secret-here
+TEAMS_CLIENT_ID=your-client-id
+TEAMS_CLIENT_SECRET=your-client-secret
 
-# Sender account
-SENDER_EMAIL=autoreminder@narwal.ai
-
-# For testing
-TEST_EMAIL=your-test-email@narwal.ai
+# Test Recipient
+TEST_EMAIL=your-test-email@yourcompany.com
 ```
 
 ### 2. Domain normalisation
@@ -192,10 +193,10 @@ Click **🚀 Send Reminders**. The app sends personalized messages with the empl
 
 ## Reminder Logic
 
-| Days Not Submitted | Suggested Channel | Severity |
-|--------------------|-------------------|----------|
-| 1 – 3 days         | Microsoft Teams   | 🟡 Mild  |
-| 4+ days            | Email             | 🔴 Critical |
+| Days Not Submitted | Suggested Channel | Severity     |
+|--------------------|-------------------|--------------|
+| 1 – 3 days         | Microsoft Teams   | 🟡 Mild      |
+| 4+ days            | Email             | 🔴 Critical  |
 
 HR can override the channel per employee (Teams / Email / Both) before sending.
 
@@ -203,13 +204,15 @@ HR can override the channel per employee (Teams / Email / Both) before sending.
 
 ## Auth Notes
 
-- **Email** uses an **app-only token** (`graph_auth.py`) — no user interaction needed, runs silently.
-- **Teams** uses a **delegated token** (`test_teams_auth.py`) — requires a one-time device flow login. The token is cached in `teams_token_cache.json` and refreshed automatically on subsequent runs.
+Both Email and Teams use the **same Azure App Registration** credentials (`TEAMS_CLIENT_ID`, `TEAMS_CLIENT_SECRET`, `TEAMS_TENANT_ID`), but with different authentication flows:
+
+- **Email** uses an app-only token — runs silently with no user interaction required.
+- **Teams** uses a delegated token — requires a one-time device flow login on first run. The token is cached locally and refreshed automatically on subsequent runs.
 
 ---
 
 ## Notes
 
 - The `data/` folder is gitignored — never commit employee data or timesheet files
-- The `.env` file should never be committed — add it to `.gitignore`
+- The `.env` file should never be committed — it is already covered in `.gitignore`
 - `teams_token_cache.json` contains auth tokens — keep it out of version control
