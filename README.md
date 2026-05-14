@@ -120,14 +120,11 @@ cp .env.example .env
 Fill in your values:
 
 ```env
-# Microsoft Graph — App-only (for Email)
-AZURE_TENANT_ID=your-tenant-id
-AZURE_CLIENT_ID=your-client-id
-AZURE_CLIENT_SECRET=your-client-secret
 
 # Microsoft Graph — Delegated (for Teams)
 TEAMS_TENANT_ID=your-tenant-id
 TEAMS_CLIENT_ID=your-teams-client-id
+TEAMS_CLIENT_SECRET=your-client-secret-here
 
 # Sender account
 SENDER_EMAIL=autoreminder@narwal.ai
