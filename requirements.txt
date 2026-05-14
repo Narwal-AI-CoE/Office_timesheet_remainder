@@ -1,0 +1,6 @@
+pandas    # Data loading, cleaning, joining CSV and Excel files
+openpyxl       # Reading and writing .xlsx Excel files
+python-dotenv   # Loading SMTP credentials from .env file
+requests
+msal
+streamlit
